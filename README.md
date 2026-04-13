@@ -30,15 +30,9 @@ Toggle between modes with the mode button in the transport bar.
 
 ## File access
 
-macOS protects access to your files. For surfing to work properly — especially if your MIDI files are spread across multiple folders — MIDIFileSurfer needs permission to read them.
+macOS protects access to your files. On first launch, MIDIFileSurfer asks you to choose a folder that contains your MIDI files.
 
-On first launch the app walks you through two options:
-
-**Option 1 — Choose a MIDI folder (recommended)**
-Click *Choose MIDI Folder* and navigate to the folder where you keep your MIDI files. The app saves a security-scoped bookmark so it can access that folder automatically on every subsequent launch, with no further prompts.
-
-**Option 2 — Full Disk Access**
-For power users who work across many different folders. Go to *System Settings → Privacy & Security → Full Disk Access* and add MIDIFileSurfer. The onboarding screen has a button that takes you straight there.
+Click *Choose MIDI Folder* and navigate to the folder where you keep your MIDI files. The app saves a read-only security-scoped bookmark so it can access that folder automatically on every subsequent launch, with no further prompts.
 
 You can re-open the permissions guide at any time from the Help menu.
 
@@ -56,14 +50,14 @@ The app will fall back to the system GM bank (`gs_instruments.dls`) if the bundl
 
 ## Requirements
 
-- macOS 13 Ventura or later
+- macOS 14 Sonoma or later
 - Xcode 15 or later (to build from source)
 
 ## Getting Started
 
 1. Clone the repo and open `MIDIFileSurfer.xcodeproj`
 2. Build and run (`⌘R`)
-3. On first launch, grant folder access or Full Disk Access
+3. On first launch, choose a MIDI folder
 4. Click *Open MIDI File* to open the file browser
 5. Click any `.mid` file — it plays immediately
 

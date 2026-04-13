@@ -9,8 +9,6 @@ import AVFoundation
 
 @Observable
 class PitchRateControlModule{
-    var playerIsPlaying: Bool = false
-
     var pitchControl = AVAudioUnitTimePitch()
 
     private var audioEngine: AudioEngine!

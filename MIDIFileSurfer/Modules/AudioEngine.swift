@@ -12,12 +12,10 @@ class AudioEngine: NSObject {
     
     var engine: AVAudioEngine!
     
-	var sequencerModule: SequencerModule!
+    var sequencerModule: SequencerModule!
     private(set) var instrumentModule: InstrumentModule!
-	
+		
     var pitchRateControlModule: PitchRateControlModule!
-    
-    private(set) var _mixerOutputFileURL: URL? = nil
 
     private var _isSessionInterrupted: Bool = false
     private var _isConfigChangePending: Bool = false
@@ -106,15 +104,6 @@ class AudioEngine: NSObject {
         get {
             return engine.mainMixerNode.outputVolume
         }
-    }
-
-    func handleMediaServicesReset(_ notification: Notification) {
-        // if we've received this notification, the media server has been reset
-        // re-wire all the connections and start the engine
-        Logger.viewLogger.info("Media services have been reset!")
-        Logger.viewLogger.info("Re-wiring connections")
-
-        self.makeEngineConnections()
     }
 
     var sequencerPositionSliderUpdateTimer : DispatchSourceTimer? = nil

@@ -7,25 +7,12 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
-import os.log
 
-open class FileAccess: NSObject {
-
-    enum FileIntent {
-        case openRead
-        case openReadMultiple
-        case saveWrite
-        case chooseDirectory
-    }
-
-    var intent: FileIntent = .openRead
+final class FileAccess: NSObject {
 
     var completion: (URL?) -> () = { url in
         print("No completion provided for URL: \(String(describing: url))")
     }
-
-    // Keeps the non-modal panel alive and lets us close it programmatically.
-    private weak var activePanel: NSOpenPanel?
 
     // MARK: - Modal (blocking) file picker
 
@@ -54,7 +41,6 @@ open class FileAccess: NSObject {
     ) {
         self.completion = completion
         let dialog = makePanel(allowedContentTypes: allowedContentTypes, multiple: false)
-        activePanel = dialog
 
         dialog.begin { [weak self, weak dialog] response in
             guard let self, let dialog else { return }
@@ -63,7 +49,6 @@ open class FileAccess: NSObject {
             if response == .OK, let url = dialog.url {
                 self.completion(url)
             }
-            self.activePanel = nil
         }
     }
 
@@ -80,21 +65,6 @@ open class FileAccess: NSObject {
         panel.allowedContentTypes = allowedContentTypes
         return panel
     }
-
-    // MARK: - Directory picker
-
-    public func selectSingleDirectory() -> URL? {
-        let dialog = NSOpenPanel()
-        dialog.delegate = self
-        dialog.title = "Choose a folder"
-        dialog.showsHiddenFiles = false
-        dialog.canChooseFiles = false
-        dialog.canChooseDirectories = true
-        if dialog.runModal() == .OK {
-            return dialog.url
-        }
-        return nil
-    }
 }
 
 // MARK: - NSOpenSavePanelDelegate
@@ -109,28 +79,5 @@ extension FileAccess: NSOpenSavePanelDelegate {
               let first = panel.urls.first else { return }
 
         completion(first)
-    }
-
-    public func panel(_ sender: Any, validate url: URL) throws {
-        switch intent {
-        case .saveWrite:
-            if !FileManager.default.isWritableFile(atPath: url.path) {
-                throw CocoaError(.fileWriteVolumeReadOnly)
-            }
-        case .chooseDirectory:
-            var isDir: ObjCBool = false
-            guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir),
-                  isDir.boolValue else {
-                throw CocoaError(.fileReadNoSuchFile)
-            }
-        default:
-            break
-        }
-    }
-
-    public func panel(_ sender: Any, shouldEnable url: URL) -> Bool { true }
-
-    public func panel(_ sender: Any, userEnteredFilename filename: String, confirmed: Bool) -> String? {
-        filename
     }
 }

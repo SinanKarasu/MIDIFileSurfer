@@ -20,9 +20,6 @@ final class MIDIFileEnv {
 	
 	private(set) var fileURL: URL?
 	private(set) var midiFile: MIDIFile?
-	private(set) var tempoMap: TempoMap!
-	
-	//var isLoaded: Bool { midiFile != nil }
 	
 	init(initialURL: URL? = nil) {
 		if let url = initialURL { try? load(url: url) }
@@ -33,7 +30,6 @@ final class MIDIFileEnv {
 		unload()
 		let file = try MIDIFile(midiFile: url)
 		self.fileURL = url
-		self.tempoMap = TempoMap(file: file)
 		self.midiFile = file
 	}
 	

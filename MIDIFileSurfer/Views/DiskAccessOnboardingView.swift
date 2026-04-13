@@ -2,9 +2,8 @@
 //  DiskAccessOnboardingView.swift
 //  MIDIFileSurfer
 //
-//  Shown on first launch to explain file-access permissions and let the user
-//  either bookmark a folder (App Sandbox friendly) or open Full Disk Access
-//  settings (for power users who run outside the App Store sandbox).
+//  Shown on first launch to explain the sandbox-friendly file access flow
+//  and let the user bookmark a folder for future launches.
 //
 
 import SwiftUI
@@ -36,9 +35,9 @@ struct DiskAccessOnboardingView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Label {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Folder access required")
+                        Text("Folder access")
                             .font(.headline)
-                        Text("macOS protects your files. To browse and instantly play MIDI files from any folder, you need to grant access first.")
+                        Text("macOS protects your files. Choose a folder that contains your MIDI files and MIDIFileSurfer will remember it for later.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -50,9 +49,9 @@ struct DiskAccessOnboardingView: View {
 
                 Label {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Option 1 — Choose a folder (recommended)")
+                        Text("Choose a folder (recommended)")
                             .font(.headline)
-                        Text("Grant access to your MIDI folder. The app remembers your choice between launches.")
+                        Text("Grant read-only access to your MIDI folder. The app remembers your choice between launches.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -62,19 +61,6 @@ struct DiskAccessOnboardingView: View {
                         .frame(width: 28)
                 }
 
-                Label {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Option 2 — Full Disk Access")
-                            .font(.headline)
-                        Text("Gives the app access to all folders. Set this in System Settings → Privacy & Security → Full Disk Access.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                } icon: {
-                    Image(systemName: "lock.open.fill")
-                        .foregroundStyle(.green)
-                        .frame(width: 28)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -82,21 +68,13 @@ struct DiskAccessOnboardingView: View {
 
             // ── Action buttons ────────────────────────────────────────────
             HStack(spacing: 12) {
-
-                Button {
-                    openFullDiskAccessSettings()
-                } label: {
-                    Label("Open System Settings", systemImage: "gear")
-                }
-                .buttonStyle(.bordered)
-
-                Spacer()
-
                 Button("Skip for now") {
                     markSeen()
                     isPresented = false
                 }
                 .buttonStyle(.bordered)
+
+                Spacer()
 
                 Button {
                     chooseFolder()
@@ -127,26 +105,18 @@ struct DiskAccessOnboardingView: View {
         isPresented = false
     }
 
-    private func openFullDiskAccessSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-            NSWorkspace.shared.open(url)
-        }
-        markSeen()
-        isPresented = false
-    }
-
     // MARK: - Persistence
 
     private func markSeen() {
         UserDefaults.standard.set(true, forKey: "hasSeenDiskAccessOnboarding")
     }
 
-    /// Saves a security-scoped bookmark so the app can access the folder
-    /// across launches without presenting another picker.
+    /// Saves a read-only security-scoped bookmark so the app can access the
+    /// selected folder across launches without presenting another picker.
     private func saveBookmark(for url: URL) {
         do {
             let data = try url.bookmarkData(
-                options: .withSecurityScope,
+                options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
@@ -176,7 +146,7 @@ enum MIDIBookmark {
             )
             if isStale {
                 // Refresh the bookmark so it stays valid.
-                if let fresh = try? url.bookmarkData(options: .withSecurityScope,
+                if let fresh = try? url.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
                                                       includingResourceValuesForKeys: nil,
                                                       relativeTo: nil) {
                     UserDefaults.standard.set(fresh, forKey: "midiBookmark")
