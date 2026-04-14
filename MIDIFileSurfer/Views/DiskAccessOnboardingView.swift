@@ -152,7 +152,10 @@ enum MIDIBookmark {
                     UserDefaults.standard.set(fresh, forKey: "midiBookmark")
                 }
             }
-            url.startAccessingSecurityScopedResource()
+            guard url.startAccessingSecurityScopedResource() else {
+                print("MIDIBookmark: failed to start accessing security-scoped resource")
+                return nil
+            }
             return url
         } catch {
             print("MIDIBookmark: failed to resolve bookmark — \(error)")
