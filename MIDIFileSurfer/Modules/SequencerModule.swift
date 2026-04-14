@@ -9,6 +9,19 @@ import SwiftUI
 import AVFoundation
 import os.log
 
+enum SequencerModuleError: LocalizedError {
+    case missingBundledDemoFile
+    case unableToLoadFile(URL, Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .missingBundledDemoFile:
+            return "The bundled demo MIDI file is missing."
+        case let .unableToLoadFile(url, underlying):
+            return "Couldn't load \(url.lastPathComponent): \(underlying.localizedDescription)"
+        }
+    }
+}
 
 class SequencerModule {
 
@@ -33,16 +46,21 @@ class SequencerModule {
 
         // load sequencer loop
         guard let midiFileURL = Bundle(for: type(of: self)).url(forResource: "bluesyRiff", withExtension: "mid") else {
-            fatalError("couldn't find midi file")
+            Logger.viewLogger.error("\(SequencerModuleError.missingBundledDemoFile.localizedDescription)")
+            return
         }
 
-        loadFile(midiFileURL: midiFileURL)
+        do {
+            try loadFile(midiFileURL: midiFileURL)
+        } catch {
+            Logger.viewLogger.error("Couldn't load bundled demo MIDI file: \(error.localizedDescription)")
+        }
 
         sequencer.prepareToPlay()
 
     }
 
-	func processURL(url: URL?) {
+	func processURL(url: URL?) throws {
         if let url = url {
             if playInstantaneous {
                 if self.playerIsPlaying {
@@ -50,7 +68,7 @@ class SequencerModule {
                 }
             }
 
-            loadFile(midiFileURL: url)
+            try loadFile(midiFileURL: url)
             if playInstantaneous {
                 self.toggleSequencer()
             }
@@ -58,7 +76,7 @@ class SequencerModule {
 
     }
 
-    private func loadFile(midiFileURL: URL) {
+    private func loadFile(midiFileURL: URL) throws {
         Logger.viewLogger.info("URL: \(midiFileURL)")
         if sequencer.isPlaying  {
             sequencer.stop()
@@ -66,7 +84,7 @@ class SequencerModule {
         do {
             try sequencer.load(from: midiFileURL, options: AVMusicSequenceLoadOptions())
         } catch {
-            fatalError("couldn't load midi file, \(error.localizedDescription)")
+            throw SequencerModuleError.unableToLoadFile(midiFileURL, error)
         }
 
         // enable looping on all the sequencer tracks

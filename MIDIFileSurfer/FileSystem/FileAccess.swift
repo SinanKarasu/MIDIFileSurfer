@@ -13,6 +13,7 @@ final class FileAccess: NSObject {
     var completion: (URL?) -> () = { url in
         print("No completion provided for URL: \(String(describing: url))")
     }
+    private var selectionFilter: ((URL) -> Bool)?
 
     // MARK: - Modal (blocking) file picker
 
@@ -20,10 +21,15 @@ final class FileAccess: NSObject {
     /// Use this for "click Play to play" mode.
     public func filterByFileTypes(
         allowedContentTypes: [UTType],
+        initialDirectory: URL? = nil,
         completion: @escaping (URL?) -> ()
     ) -> URL? {
         self.completion = completion
-        let dialog = makePanel(allowedContentTypes: allowedContentTypes, multiple: false)
+        let dialog = makePanel(
+            allowedContentTypes: allowedContentTypes,
+            multiple: false,
+            initialDirectory: initialDirectory
+        )
         if dialog.runModal() == .OK {
             return dialog.url
         }
@@ -37,10 +43,17 @@ final class FileAccess: NSObject {
     /// calls `completion`, and closes the panel — no OK button needed.
     public func filterByFileTypesSheet(
         allowedContentTypes: [UTType],
+        initialDirectory: URL? = nil,
+        selectionFilter: ((URL) -> Bool)? = nil,
         completion: @escaping (URL?) -> ()
     ) {
         self.completion = completion
-        let dialog = makePanel(allowedContentTypes: allowedContentTypes, multiple: false)
+        self.selectionFilter = selectionFilter
+        let dialog = makePanel(
+            allowedContentTypes: allowedContentTypes,
+            multiple: false,
+            initialDirectory: initialDirectory
+        )
 
         dialog.begin { [weak self, weak dialog] response in
             guard let self, let dialog else { return }
@@ -54,7 +67,11 @@ final class FileAccess: NSObject {
 
     // MARK: - Shared panel factory
 
-    private func makePanel(allowedContentTypes: [UTType], multiple: Bool) -> NSOpenPanel {
+    private func makePanel(
+        allowedContentTypes: [UTType],
+        multiple: Bool,
+        initialDirectory: URL?
+    ) -> NSOpenPanel {
         let panel = NSOpenPanel()
         panel.delegate = self
         panel.title = "Select a MIDI File"
@@ -63,6 +80,7 @@ final class FileAccess: NSObject {
         panel.canChooseDirectories = false
         panel.canCreateDirectories = false
         panel.allowedContentTypes = allowedContentTypes
+        panel.directoryURL = initialDirectory
         return panel
     }
 }
@@ -78,6 +96,9 @@ extension FileAccess: NSOpenSavePanelDelegate {
         guard let panel = sender as? NSOpenPanel,
               let first = panel.urls.first else { return }
 
+        if let selectionFilter, !selectionFilter(first) {
+            return
+        }
         completion(first)
     }
 }

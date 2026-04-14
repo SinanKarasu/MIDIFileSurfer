@@ -106,20 +106,18 @@ struct SequencerView: View {
 	
 	func loadFile(url: URL?) {
 		if let url = url {
+			MIDIBookmark.rememberRecentFile(url)
 			if self.sequencerModule.playerIsPlaying {
 				self.sequencerModule.toggleSequencer()
 				self.audioEngine.stopTimer()
 			}
 			
 			do {
-				sequencerModule.processURL(url: url)
+				try sequencerModule.processURL(url: url)
 				try env.load(url: url)
 			} catch {
-				let alert = NSAlert()
-				alert.messageText = "Error opening the MIDI File:\(url)"
-				alert.informativeText = (error as NSError).localizedDescription
-				alert.alertStyle = .warning
-				alert.runModal()
+				presentLoadError(for: url, error: error)
+				return
 			}
 			
 			if playInstantaneous {
@@ -129,6 +127,102 @@ struct SequencerView: View {
 				}
 			}
 		}
+	}
+
+		private func presentLoadError(for url: URL, error: Error) {
+		let alert = NSAlert()
+		alert.alertStyle = .warning
+		alert.messageText = "Can't Open \(url.lastPathComponent)"
+		alert.informativeText = loadErrorMessage(for: url, error: error)
+
+		if shouldOfferFolderAccess(for: url, error: error) {
+			alert.addButton(withTitle: "Share Folder")
+			alert.addButton(withTitle: "Open File")
+			alert.addButton(withTitle: "OK")
+
+			switch alert.runModal() {
+			case .alertFirstButtonReturn:
+				if let folderURL = MIDIBookmark.promptForFolderAccess(
+					title: "Choose the folder that contains \(url.lastPathComponent)",
+					prompt: "Grant Access",
+					initialDirectory: url.deletingLastPathComponent()
+				),
+				url.isInside(folderURL) {
+					loadFile(url: url)
+				}
+			case .alertSecondButtonReturn:
+				if let replacementURL = promptForSpecificFileAccess(for: url) {
+					loadFile(url: replacementURL)
+				}
+			default:
+				break
+			}
+			return
+		}
+
+		alert.runModal()
+	}
+
+	private func loadErrorMessage(for url: URL, error: Error) -> String {
+		if isLikelyICloudPlaceholder(url) {
+			return """
+			This file appears to live in iCloud and may not be downloaded on this Mac yet. Download it locally in Finder, then try again.
+
+			Share Folder if you want MIDIFileSurfer to surf this folder with single clicks, or Open File if you only want this one file right now.
+			"""
+		}
+
+		if shouldOfferFolderAccess(for: url, error: error) {
+			return """
+			This file is outside the folders currently shared with MIDIFileSurfer.
+
+			Share Folder to grant read-only access to the folder that contains it, or Open File to reopen only this one file right now. If it lives in iCloud Drive, make sure it is downloaded locally first.
+
+			If you use a non-App-Store build and keep MIDI files scattered across many locations, Full Disk Access can also help.
+			"""
+		}
+
+		return (error as NSError).localizedDescription
+	}
+
+	private func shouldOfferFolderAccess(for url: URL, error: Error) -> Bool {
+		MIDIBookmark.grantedFolder(containing: url) == nil || isLikelyPermissionError(error) || isLikelyICloudPlaceholder(url)
+	}
+
+	private func isLikelyPermissionError(_ error: Error) -> Bool {
+		let nsError = error as NSError
+		if nsError.domain == NSCocoaErrorDomain && nsError.code == NSFileReadNoPermissionError {
+			return true
+		}
+		if nsError.domain == NSPOSIXErrorDomain && (nsError.code == EACCES || nsError.code == EPERM) {
+			return true
+		}
+		if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+			return isLikelyPermissionError(underlying)
+		}
+		return false
+	}
+
+	private func isLikelyICloudPlaceholder(_ url: URL) -> Bool {
+		guard FileManager.default.isUbiquitousItem(at: url) else { return false }
+		let values = try? url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey])
+		return values?.ubiquitousItemDownloadingStatus != URLUbiquitousItemDownloadingStatus.current
+	}
+
+	private func promptForSpecificFileAccess(for url: URL) -> URL? {
+		let panel = NSOpenPanel()
+		panel.title = "Choose \(url.lastPathComponent)"
+		panel.message = "Select the MIDI file you want to open right now."
+		panel.prompt = "Open"
+		panel.canChooseFiles = true
+		panel.canChooseDirectories = false
+		panel.canCreateDirectories = false
+		panel.allowsMultipleSelection = false
+		panel.allowedContentTypes = [.midi]
+		panel.directoryURL = url.deletingLastPathComponent()
+
+		guard panel.runModal() == .OK else { return nil }
+		return panel.url
 	}
 	
 	func printFileName(url: URL?) {
@@ -142,14 +236,31 @@ struct SequencerView: View {
 	var openButton: some View {
 		Button(action: {
 			if playInstantaneous {
-				fileAccess!.filterByFileTypesSheet(allowedContentTypes: [.midi], completion: loadFile)
+				openImmediateFileBrowser()
 			} else {
-				let url = fileAccess!.filterByFileTypes(allowedContentTypes: [.midi], completion: printFileName)
+				let url = fileAccess!.filterByFileTypes(
+					allowedContentTypes: [.midi],
+					initialDirectory: MIDIBookmark.recentDirectoryURL() ?? MIDIBookmark.grantedFolderURLs().first,
+					completion: printFileName
+				)
 				loadFile(url: url)
 			}
 		}){
 			Text(openButtonText)
 		}
+	}
+
+	private func openImmediateFileBrowser() {
+		let preferredDirectory =
+			MIDIBookmark.recentDirectoryURL()
+			?? env.fileURL?.deletingLastPathComponent()
+			?? MIDIBookmark.grantedFolderURLs().first
+
+		fileAccess!.filterByFileTypesSheet(
+			allowedContentTypes: [.midi],
+			initialDirectory: preferredDirectory,
+			completion: loadFile
+		)
 	}
 	
 	var modeButton: some View {
@@ -199,7 +310,14 @@ struct SequencerView: View {
 	
 }
 
+extension URL {
+	func isInside(_ directory: URL) -> Bool {
+		let filePath = standardizedFileURL.path
+		let directoryPath = directory.standardizedFileURL.path
+		return filePath == directoryPath || filePath.hasPrefix(directoryPath + "/")
+	}
+}
+
 #Preview {
 	SequencerView(env: MIDIFileEnv(), audioEngine: AudioEngine())
 }
-
