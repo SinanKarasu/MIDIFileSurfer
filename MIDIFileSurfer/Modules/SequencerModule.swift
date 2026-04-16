@@ -45,7 +45,7 @@ class SequencerModule {
         sequencer = AVAudioSequencer(audioEngine: audioEngine.engine)
 
         // load sequencer loop
-        guard let midiFileURL = Bundle(for: type(of: self)).url(forResource: "bluesyRiff", withExtension: "mid") else {
+        guard let midiFileURL = Bundle(for: type(of: self)).url(forResource: "DemoLoop", withExtension: "mid") else {
             Logger.viewLogger.error("\(SequencerModuleError.missingBundledDemoFile.localizedDescription)")
             return
         }
