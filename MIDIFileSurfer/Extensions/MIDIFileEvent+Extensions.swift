@@ -1,38 +1,30 @@
 //
-//  MIDIEvent rawBytes.swift
-//  MIDIKit • https://github.com/orchetect/MIDIKit
-//  © 2021-2025 Steffan Andrews • Licensed under MIT License
+//  MIDIFileEvent+Extensions.swift
+//  MIDIFileSurfer
 //
 
-// MARK: - MIDI 1.0
-import MIDIKit
-
-/// Returns the complete raw MIDI 1.0 message bytes that comprise the event.
-///
-/// - Note: This is mainly for internal use and is not necessary to access during typical usage
-///   of MIDIKit, but is provided publicly for introspection and debugging purposes.
-import MIDIKitSMF
+import SwiftMIDIFile
 
 extension MIDIFileEvent {
 	public func midi1RawBytes() -> [UInt8] {
 		switch self {
-		case .noteOn(_, let e):
+		case .noteOn(let e):
 			return e.midi1RawBytes()
-		case .noteOff(_, let e):
+		case .noteOff(let e):
 			return e.midi1RawBytes()
-		case .cc(_, let e):
+		case .cc(let e):
 			return e.midi1RawBytes()
-		case .programChange(_, let e):
+		case .programChange(let e):
 			return e.midi1RawBytes()
-		case .pressure(_, let e):
+		case .pressure(let e):
 			return e.midi1RawBytes()
-		case .pitchBend(_, let e):
+		case .pitchBend(let e):
 			return e.midi1RawBytes()
-		case .notePressure(_, let e):
+		case .notePressure(let e):
 			return e.midi1RawBytes()
-		case .sysEx7(_, let e):
+		case .sysEx7(let e):
 			return e.midi1RawBytes()
-		case .universalSysEx7(_, let e):
+		case .universalSysEx7(let e):
 			return e.midi1RawBytes()
 		default:
 			return []
@@ -42,10 +34,9 @@ extension MIDIFileEvent {
 
 extension MIDIFileEvent {
 	var isNoteOnZeroVelocity: Bool {
-		if case .noteOn(_, let e) = self {
+		if case .noteOn(let e) = self {
 			return e.velocity.midi1Value == 0
 		}
 		return false
 	}
 }
-

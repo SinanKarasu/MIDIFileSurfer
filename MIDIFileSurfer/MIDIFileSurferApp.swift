@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import MIDIKit
 
 @main
 struct MIDIFileSurferApp: App {

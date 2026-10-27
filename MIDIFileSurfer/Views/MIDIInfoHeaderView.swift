@@ -1,12 +1,12 @@
 //
 //  MIDIInfoHeaderView.swift
-//  SiKMIDIKitNew
+//  MIDIFileSurfer
 //
 //  Created by Sinan Karasu on 2/19/23.
 //
 
 import SwiftUI
-import MIDIKitSMF
+import SwiftMIDIFile
 
 struct MIDIInfoHeaderView: View {
 	/*@Bindable*/ var midiFileEnv: MIDIFileEnv
@@ -19,9 +19,9 @@ struct MIDIInfoHeaderView: View {
 					let urlString = midiFileEnv.fileURL?.path(percentEncoded: false) ?? "—"
 					Text(verbatim: "MIDI File: \(urlString)")
 					Text(verbatim: "Format: \(file.format.description)")
-					Text(verbatim: "TimeBase: \(file.timeBase.description)")
+					Text(verbatim: "TimeBase: \(file.timebase.description)")
 					Text(verbatim: "PPQ: \(ppq)")
-					Text(verbatim: "num tracks: \(file.tracks.count)")
+					Text(verbatim: "num tracks: \(file.surferTracks.count)")
 					Text(verbatim: "Tick resolution: \(midiFileEnv.tickResolution(), default: "")")
 				} else {
 					Text("Waiting for a MIDI file.")

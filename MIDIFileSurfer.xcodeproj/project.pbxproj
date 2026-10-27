@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F7FC30CA2ED682620037FBE4 /* MIDIKit in Frameworks */ = {isa = PBXBuildFile; productRef = F7FC30C92ED682620037FBE4 /* MIDIKit */; };
+		F7FC30CA2ED682620037FBE4 /* SwiftMIDIFile in Frameworks */ = {isa = PBXBuildFile; productRef = F7FC30C92ED682620037FBE4 /* SwiftMIDIFile */; };
 		F7FC30D92ED6829E0037FBE4 /* SwiftRadix in Frameworks */ = {isa = PBXBuildFile; productRef = F7FC30D82ED6829E0037FBE4 /* SwiftRadix */; };
 /* End PBXBuildFile section */
 
@@ -28,7 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7FC30CA2ED682620037FBE4 /* MIDIKit in Frameworks */,
+				F7FC30CA2ED682620037FBE4 /* SwiftMIDIFile in Frameworks */,
 				F7FC30D92ED6829E0037FBE4 /* SwiftRadix in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -72,7 +72,7 @@
 			);
 			name = MIDIFileSurfer;
 			packageProductDependencies = (
-				F7FC30C92ED682620037FBE4 /* MIDIKit */,
+				F7FC30C92ED682620037FBE4 /* SwiftMIDIFile */,
 				F7FC30D82ED6829E0037FBE4 /* SwiftRadix */,
 			);
 			productName = MIDIFileSurfer;
@@ -104,7 +104,7 @@
 			mainGroup = F7FC30B12ED681E30037FBE4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "MIDIKit" */,
+				F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "swift-midi-file" */,
 				F7FC30D72ED6829E0037FBE4 /* XCRemoteSwiftPackageReference "SwiftRadix" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -376,12 +376,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "MIDIKit" */ = {
+		F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "swift-midi-file" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/orchetect/MIDIKit.git";
+			repositoryURL = "https://github.com/orchetect/swift-midi-file.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.10.5;
+				minimumVersion = 1.0.2;
 			};
 		};
 		F7FC30D72ED6829E0037FBE4 /* XCRemoteSwiftPackageReference "SwiftRadix" */ = {
@@ -395,10 +395,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F7FC30C92ED682620037FBE4 /* MIDIKit */ = {
+		F7FC30C92ED682620037FBE4 /* SwiftMIDIFile */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "MIDIKit" */;
-			productName = MIDIKit;
+			package = F7FC30C82ED682620037FBE4 /* XCRemoteSwiftPackageReference "swift-midi-file" */;
+			productName = SwiftMIDIFile;
 		};
 		F7FC30D82ED6829E0037FBE4 /* SwiftRadix */ = {
 			isa = XCSwiftPackageProductDependency;

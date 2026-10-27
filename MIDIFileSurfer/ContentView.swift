@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import MIDIKit
 
 struct ContentView: View {
     @State var audioEngine = AudioEngine()

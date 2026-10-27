@@ -1,15 +1,14 @@
 //
 //  TrackNavigatorView.swift
-//  SiKMIDIKitNew
+//  MIDIFileSurfer
 //
 //  Created by Sinan Karasu on 3/9/23.
 //
 
 import SwiftUI
-import MIDIKit
 
 struct TrackNavigatorView: View {
-	var tracks: [MIDIFile.Chunk.Track]
+	var tracks: [MIDIFileTrack]
 	var ppq: Int
 	//@Bindable var audioEngine: AudioEngine
 	@Bindable var midiFileEnv: MIDIFileEnv
@@ -44,4 +43,3 @@ struct TrackNavigatorView: View {
 #Preview {
 	TrackNavigatorView(tracks: [], ppq: 480, midiFileEnv: MIDIFileEnv())
 }
-

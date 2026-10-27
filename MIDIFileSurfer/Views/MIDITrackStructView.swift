@@ -1,16 +1,15 @@
 //
 //  MIDITrackIView.swift
-//  SiKMIDIKitNew
+//  MIDIFileSurfer
 //
 //  Created by Sinan Karasu on 4/1/23.
 //
 
 import SwiftUI
-import MIDIKit
 
 struct MIDITrackStructView: View {
 	
-	var track: MIDIFile.Chunk.Track
+	var track: MIDIFileTrack
 	var ppq: Int
 	@State private var selection = Set<DispFormStruct.ID>()
 	
@@ -22,7 +21,7 @@ struct MIDITrackStructView: View {
 		}
 		
 		for i in 0..<max(0, iMesss.count - 1) {
-			iMesss[i + 1].fixTimeForEvent(from: iMesss[i], ppq: ppq)
+			iMesss[i + 1].fixTimeForEvent(from: iMesss[i], timebase: track.timebase)
 		}
 		
 		return VStack {
