@@ -18,6 +18,23 @@ final class MIDIQuickLookTests: XCTestCase {
         XCTAssertEqual(summary.tempo, "120.0 BPM (initial)")
     }
 
+    func testTrackDescriptionsDistinguishMetadataLyricsAndPercussion() throws {
+        func summary(events: [UInt8]) throws -> String {
+            let bytes = events + [0, 0xff, 0x2f, 0]
+            var data = Data([0x4d,0x54,0x68,0x64,0,0,0,6,0,0,0,1,1,0xe0,
+                             0x4d,0x54,0x72,0x6b,0,0,0,UInt8(bytes.count)])
+            data.append(contentsOf: bytes)
+            return try MIDIPreviewSummary(data: data).tracks[0].instrument
+        }
+        XCTAssertEqual(try summary(events: []), "Metadata")
+        XCTAssertEqual(try summary(events: [0,0xff,5,2,72,105]), "Lyrics")
+        // Track name "Words", followed by generic text, as used by older KAR files.
+        XCTAssertEqual(try summary(events: [0,0xff,3,5,87,111,114,100,115,0,0xff,1,2,72,105]), "Lyrics")
+        XCTAssertEqual(try summary(events: [0,0x99,36,100]), "Ch 10: Percussion")
+        XCTAssertEqual(try summary(events: [0,0x90,60,100]), "Ch 1: Acoustic Grand Piano (default)")
+        XCTAssertEqual(try summary(events: [0,0xff,1,2,72,105]), "Text and metadata")
+    }
+
     func testMalformedFileIsRejected() {
         XCTAssertThrowsError(try MIDIPreviewSummary(data: Data("not MIDI".utf8)))
     }

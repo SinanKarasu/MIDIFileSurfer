@@ -31,14 +31,39 @@ struct MIDIPreviewSummary: Sendable {
                 }
                 return nil
             }.first ?? "Track \(index + 1)"
-            let instruments = Set(track.events.compactMap { entry -> String? in
-                if case .programChange(let event) = entry.event {
-                    return "Ch \(Int(event.channel) + 1): \(GeneralMIDI.name(for: Int(event.program)))"
+            var channels = Set<Int>()
+            var programs: [Int: Set<Int>] = [:]
+            var hasLyrics = false
+            var hasText = false
+            for entry in track.events {
+                switch entry.event {
+                case .noteOn(let event): channels.insert(Int(event.channel))
+                case .noteOff(let event): channels.insert(Int(event.channel))
+                case .cc(let event): channels.insert(Int(event.channel))
+                case .pitchBend(let event): channels.insert(Int(event.channel))
+                case .pressure(let event): channels.insert(Int(event.channel))
+                case .notePressure(let event): channels.insert(Int(event.channel))
+                case .programChange(let event):
+                    let channel = Int(event.channel)
+                    channels.insert(channel)
+                    programs[channel, default: []].insert(Int(event.program))
+                case .text(let event):
+                    hasLyrics = hasLyrics || event.textType == .lyric
+                    hasText = hasText || event.textType == .text
+                default: break
                 }
-                return nil
-            }).sorted()
+            }
+            // Older karaoke files often store words as generic text events.
+            let lyricName = ["words", "lyrics", "lyric"].contains(name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
+            var descriptions = channels.sorted().map { channel -> String in
+                if channel == 9 { return "Ch 10: Percussion" }
+                let names = programs[channel]?.sorted().map { GeneralMIDI.name(for: $0) }
+                return "Ch \(channel + 1): " + (names?.joined(separator: ", ") ?? "Acoustic Grand Piano (default)")
+            }
+            if hasLyrics || (hasText && lyricName) { descriptions.append("Lyrics") }
+            if descriptions.isEmpty { descriptions = [hasText ? "Text and metadata" : "Metadata"] }
             return Track(id: index, name: name,
-                         instrument: instruments.isEmpty ? "Default program / MIDI events" : instruments.joined(separator: ", "),
+                         instrument: descriptions.joined(separator: " • "),
                          eventCount: track.events.count)
         }
     }

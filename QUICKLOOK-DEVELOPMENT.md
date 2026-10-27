@@ -9,7 +9,8 @@ commit `3e9a303` before the Quick Look feature changes.
 - The containing macOS app embeds `MIDIQuickLook.appex` and declares itself an
   alternate viewer for `public.midi-audio`. It can receive Finder Open With URLs.
 - The preview displays file format, timing resolution, initial tempo and tracks
-  with program-change instruments. It offers Play/Pause, elapsed/total time and
+  with program-change instruments. Metadata, lyric and percussion tracks have
+  explicit descriptions; older karaoke text tracks are recognized conservatively. It offers Play/Pause, elapsed/total time and
   seeking. There is no autoplay.
 - Both playback paths use Apple's DLS synth (`kAudioUnitSubType_DLSSynth`).
   The system owns sample loading. No bundled soundfont or system file path is used.
@@ -22,7 +23,7 @@ commit `3e9a303` before the Quick Look feature changes.
 
 ## Verified on October 27, 2026
 
-- Five XCTest cases passed: metadata/default tempo; malformed-file rejection;
+- Six XCTest cases passed: track-role descriptions; metadata/default tempo; malformed-file rejection;
   load/seek/reset without autoplay; preview controller preparation/disappearance;
   offline audio rendering from Apple's synth with nonzero sample output.
 - Signed Release builds succeeded for arm64 and x86_64 using the configured
