@@ -78,9 +78,9 @@ class SequencerModule {
 
     private func loadFile(midiFileURL: URL) throws {
         Logger.viewLogger.info("URL: \(midiFileURL)")
-        if sequencer.isPlaying  {
-            sequencer.stop()
-        }
+        sequencer.stop()
+        playerIsPlaying = false
+        AppleMIDIInstrument.silence(audioEngine.instrumentModule.sampler)
         do {
             try sequencer.load(from: midiFileURL, options: AVMusicSequenceLoadOptions())
         } catch {
@@ -98,9 +98,11 @@ class SequencerModule {
             }
         }
 
+        sequencer.currentPositionInSeconds = 0
+        for track in sequencer.tracks {
+            track.destinationAudioUnit = audioEngine.instrumentModule.sampler
+        }
         sequencer.prepareToPlay()
-
-
     }
 
     var sequencerPlaybackRate: Float {
@@ -117,15 +119,20 @@ class SequencerModule {
         if !self.sequencerIsPlaying {
             do {
 
-                self.audioEngine.startEngine()
+                try self.audioEngine.startEngine()
                 sequencer!.currentPositionInSeconds = 0
 
                 try sequencer!.start()
             } catch {
-                fatalError("couldn't start sequencer")
+                sequencer.stop()
+                audioEngine.engine.stop()
+                audioEngine.playbackError = "Couldn’t play MIDI: \(error.localizedDescription)"
+                playerIsPlaying = false
+                return
             }
         } else {
             sequencer!.stop()
+            AppleMIDIInstrument.silence(audioEngine.instrumentModule.sampler)
             NotificationCenter.default.post(name: .ShouldEnginePause, object: nil)
         }
         self.playerIsPlaying = sequencerIsPlaying

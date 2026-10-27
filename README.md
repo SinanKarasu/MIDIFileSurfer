@@ -38,15 +38,27 @@ You can re-open the permissions guide at any time from the Help menu.
 
 ## Soundbank
 
-MIDIFileSurfer uses a bundled GM soundbank (`MuseScore_General.sf2`) for playback. This file is **not included in the repository** due to its size (≈205 MB).
+MIDIFileSurfer uses Apple's built-in DLS synthesizer and system General MIDI
+soundbank. No soundfont download or bundled sample library is required.
+Audio startup failures are shown as recoverable errors.
 
-To build from source, download it from the [MuseScore repository](https://github.com/musescore/MuseScore/tree/master/share/sound) and place it at:
+## Finder Quick Look
 
-```
-MIDIFileSurfer/Supporting Files/MuseScore_General.sf2
-```
+The app embeds a sandboxed Quick Look preview extension for `public.midi-audio`
+(`.mid` / `.midi`). Select a MIDI file in Finder and press Space. The preview
+shows format, timing, initial tempo, track names and program-change instruments.
+Press Play to listen with Apple's General MIDI sounds; Pause resumes from the
+same position, and the timeline supports seeking. Playback never starts
+automatically and stops when the preview closes or changes files.
 
-The app will fall back to the system GM bank (`gs_instruments.dls`) if the bundled file is not found.
+Build and run the containing app, then enable MIDIQuickLook in System Settings
+under Login Items & Extensions → Quick Look if needed. macOS chooses among
+registered providers for each file type, so another MIDI preview provider can
+need disabling. A signed build is needed to verify Finder integration.
+
+Preview input is limited to 32 MB. Large or malformed MIDI files report an error
+rather than starting playback. Preview metadata is parsed off the main thread.
+
 
 ## Requirements
 

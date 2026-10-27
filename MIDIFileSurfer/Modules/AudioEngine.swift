@@ -10,6 +10,7 @@ import os.log
 @Observable
 class AudioEngine: NSObject {
     
+    var playbackError: String?
     var engine: AVAudioEngine!
     
     var sequencerModule: SequencerModule!
@@ -83,13 +84,9 @@ class AudioEngine: NSObject {
         engine.connect(pitchRateControlModule.pitchControl, to: engine.mainMixerNode, format: nil)
     }
 
-    func startEngine() {
+    func startEngine() throws {
         if !engine.isRunning {
-            do {
-                try engine.start()
-            } catch let error {
-                fatalError("couldn't start engine, \(error.localizedDescription)")
-            }
+            try engine.start()
             Logger.viewLogger.info("Started Engine")
         }
     }
@@ -110,6 +107,7 @@ class AudioEngine: NSObject {
     var sequencerPositionSlider: Float = 0.0
 
     func startTimer()  {
+        stopTimer()
         self.sequencerPositionSliderUpdateTimer = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags(rawValue: 0), queue: DispatchQueue.main)
         if let sequencerPositionSliderUpdateTimer = self.sequencerPositionSliderUpdateTimer {
             sequencerPositionSliderUpdateTimer.schedule(deadline: .now(), repeating: 0.1 * Double(NSEC_PER_SEC), leeway: .nanoseconds(0))

@@ -28,7 +28,6 @@ struct MIDIInfoHeaderView: View {
 				}
 			}
 		}
-		.border(.yellow)
 	}
 }
 

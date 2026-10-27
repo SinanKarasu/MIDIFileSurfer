@@ -31,10 +31,27 @@ struct ContentView: View {
                     .foregroundColor(.accentColor)
             }
             MIDISMFView(audioEngine: audioEngine, midiFileEnv: midiFileEnv)
-                .border(.orange)
+        }
+        .alert("Playback Unavailable", isPresented: Binding(
+            get: { audioEngine.playbackError != nil },
+            set: { if !$0 { audioEngine.playbackError = nil } }
+        )) {
+            Button("OK") { audioEngine.playbackError = nil }
+        } message: {
+            Text(audioEngine.playbackError ?? "")
         }
         .sheet(isPresented: $showOnboarding) {
             DiskAccessOnboardingView(isPresented: $showOnboarding)
+        }
+        .onOpenURL { url in
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            do {
+                try midiFileEnv.load(url: url)
+                try audioEngine.sequencerModule.processURL(url: url)
+            } catch {
+                audioEngine.playbackError = "Couldn’t open \(url.lastPathComponent): \(error.localizedDescription)"
+            }
         }
         .onAppear {
             // Resume any previously granted security-scoped folder access.

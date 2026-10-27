@@ -64,7 +64,6 @@ struct MIDITrackStructView: View {
 				}
 			}
 		}
-		.border(.purple)
 	}
 	
 }
