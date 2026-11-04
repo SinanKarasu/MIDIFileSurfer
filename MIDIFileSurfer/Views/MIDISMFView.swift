@@ -59,52 +59,14 @@ struct MIDISMFView: View {
     // MARK: - Instrument summary
 
     func makeInstrumentSummaries(from file: AnyMIDI1File) -> [TrackInstrumentSummary] {
-        file.surferTracks.enumerated().compactMap { idx, track in
-            summaryForTrack(track, index: idx + 1)
-        }
-    }
-}
-
-// MARK: - Track/instrument helpers
-
-extension MIDISMFView {
-    func summaryForTrack(_ track: MIDIFileTrack, index: Int) -> TrackInstrumentSummary? {
-        let trackName = findTrackName(in: track) ?? "Track \(index)"
-        if let (channel, program) = findFirstProgramChange(in: track) {
+        file.surferTracks.enumerated().map { index, track in
+            let summary = MIDIPreviewSummary.Track(track: track, index: index)
             return TrackInstrumentSummary(
-                trackIndex: index,
-                trackName: trackName,
-                instrumentName: gmInstrumentName(for: program),
-                midiChannel: Int(channel) + 1
+                trackIndex: index + 1,
+                trackName: summary.name,
+                instrumentName: summary.instrument,
+                midiChannel: nil // Channels are included in the shared description.
             )
         }
-        return TrackInstrumentSummary(
-            trackIndex: index,
-            trackName: trackName,
-            instrumentName: "Unknown Instrument",
-            midiChannel: 1
-        )
-    }
-
-    func findTrackName(in track: MIDIFileTrack) -> String? {
-        for ev in track.events {
-            if case .text(let e) = ev.event, e.textType == .trackOrSequenceName {
-                return e.text
-            }
-        }
-        return nil
-    }
-
-    func findFirstProgramChange(in track: MIDIFileTrack) -> (channel: Int, program: Int)? {
-        for ev in track.events {
-            if case .programChange(let e) = ev.event {
-                return (channel: Int(e.channel), program: Int(e.program))
-            }
-        }
-        return nil
-    }
-
-    func gmInstrumentName(for program: Int) -> String {
-        GeneralMIDI.name(for: program)
     }
 }

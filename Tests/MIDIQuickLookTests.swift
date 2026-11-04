@@ -1,6 +1,7 @@
 import XCTest
 import AVFoundation
 import AppKit
+import SwiftMIDIFile
 
 final class MIDIQuickLookTests: XCTestCase {
     // One piano note, 480 PPQ, lasting one quarter note at the default 120 BPM.
@@ -33,6 +34,28 @@ final class MIDIQuickLookTests: XCTestCase {
         XCTAssertEqual(try summary(events: [0,0x99,36,100]), "Ch 10: Percussion")
         XCTAssertEqual(try summary(events: [0,0x90,60,100]), "Ch 1: Acoustic Grand Piano (default)")
         XCTAssertEqual(try summary(events: [0,0xff,1,2,72,105]), "Text and metadata")
+    }
+
+    func testSharedTrackDescriptionIncludesAllChannelsAndPrograms() throws {
+        let events: [UInt8] = [
+            0,0xc2,40,                     // Channel 3: violin
+            0,0xc2,41,                     // Channel 3: viola
+            0,0x93,60,100,                 // Channel 4: default piano
+            0,0xc9,0, 0,0x99,36,100,       // Channel 10 remains percussion
+            0,0xff,5,2,72,105,             // Lyrics
+            0,0xff,0x2f,0
+        ]
+        var data = Data([0x4d,0x54,0x68,0x64,0,0,0,6,0,0,0,1,1,0xe0,
+                         0x4d,0x54,0x72,0x6b,0,0,0,UInt8(events.count)])
+        data.append(contentsOf: events)
+        let file = try AnyMIDI1File(data: data)
+        let track = try XCTUnwrap(file.surferTracks.first)
+        // This initializer is shared by the app inspector and Quick Look.
+        let description = MIDIPreviewSummary.Track(track: track, index: 0)
+        XCTAssertEqual(description.instrument,
+                       "Ch 3: Violin, Viola • Ch 4: Acoustic Grand Piano (default) • Ch 10: Percussion • Lyrics")
+        XCTAssertEqual(try MIDIPreviewSummary(data: data).tracks.first?.instrument,
+                       description.instrument)
     }
 
     func testMalformedFileIsRejected() {

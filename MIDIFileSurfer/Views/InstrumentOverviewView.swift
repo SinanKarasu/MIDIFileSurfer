@@ -19,20 +19,20 @@ struct TrackInstrumentSummary: Identifiable {
 struct InstrumentOverviewView: View {
 	let tracks: [TrackInstrumentSummary]
 	
-	// Unique instrument list for quick glance
-	private var uniqueInstrumentNames: [String] {
+	// Include non-instrument roles such as lyrics and metadata.
+	private var uniqueTrackDescriptions: [String] {
 		Array(Set(tracks.map { $0.instrumentName })).sorted()
 	}
 	
 	var body: some View {
 		VStack(alignment: .leading, spacing: 8) {
 			
-			// Overall instruments used
-			if !uniqueInstrumentNames.isEmpty {
-				Text("Instruments used (\(uniqueInstrumentNames.count))")
+			// Overall track roles and instruments
+			if !uniqueTrackDescriptions.isEmpty {
+				Text("Track roles and instruments")
 					.font(.headline)
 				
-				Text(uniqueInstrumentNames.joined(separator: ", "))
+				Text(uniqueTrackDescriptions.joined(separator: ", "))
 					.font(.subheadline)
 					.foregroundStyle(.secondary)
 					.lineLimit(2)

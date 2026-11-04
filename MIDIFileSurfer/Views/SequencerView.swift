@@ -89,7 +89,9 @@ struct SequencerView: View {
 			self.audioEngine.stopTimer()
 		} else {
 			self.sequencerModule.toggleSequencer()
-			self.audioEngine.startTimer()
+            if self.sequencerModule.playerIsPlaying {
+                self.audioEngine.startTimer()
+            }
 		}
 	}
 	
@@ -283,7 +285,7 @@ struct SequencerView: View {
 	}
 	
 	var setSequencerPlaybackRate: some View {
-		ResettableAlignedSliderView(label: "Speed", value: $audioEngine.sequencerModule.sequencerPlaybackRate, defaultValue: 1.0, range: 0.0...2.0)
+		ResettableAlignedSliderView(label: "Speed", value: $audioEngine.sequencerModule.sequencerPlaybackRate, defaultValue: 1.0, range: SequencerModule.playbackRateRange)
 	}
 	
 	var progressView: some View {
@@ -293,7 +295,7 @@ struct SequencerView: View {
 					.font(Font.system(.body, design: .monospaced))
 					.frame(width:130)
 				Divider()
-				Text(String(format: "total:%.2f", sequencerModule.sequencerTrackLengthSeconds/audioEngine.sequencerModule.sequencerPlaybackRate))
+				Text(String(format: "total:%.2f", sequencerModule.sequencerTrackLengthSeconds / max(sequencerModule.sequencerPlaybackRate, SequencerModule.playbackRateRange.lowerBound)))
 					.font(Font.system(.body, design: .monospaced))
 			}
 			ProgressView("Playing Time",
@@ -303,6 +305,7 @@ struct SequencerView: View {
 					radius: 4.0, x: 1.0, y: 2.0)
 		}
 		.onReceive(timer) { _ in
+            sequencerModule.refreshPlaybackState()
 			playerPosition = min(Double(sequencerModule.sequencer.currentPositionInSeconds), TimeInterval(sequencerModule.sequencerTrackLengthSeconds))
 		}
 		.frame(height: 20)

@@ -23,7 +23,10 @@ enum SequencerModuleError: LocalizedError {
     }
 }
 
+@Observable
 class SequencerModule {
+
+    static let playbackRateRange: ClosedRange<Float> = 0.25...2.0
 
     //let panel = NSOpenPanel()
     var sequencer: AVAudioSequencer!
@@ -107,11 +110,13 @@ class SequencerModule {
 
     var sequencerPlaybackRate: Float {
         get {
-            return sequencer?.rate ?? 0.0
+            return sequencer?.rate ?? 1.0
         }
 
         set {
-            sequencer?.rate = newValue
+            guard newValue.isFinite else { return }
+            sequencer?.rate = min(max(newValue, Self.playbackRateRange.lowerBound),
+                                  Self.playbackRateRange.upperBound)
         }
     }
 
@@ -136,6 +141,24 @@ class SequencerModule {
             NotificationCenter.default.post(name: .ShouldEnginePause, object: nil)
         }
         self.playerIsPlaying = sequencerIsPlaying
+    }
+
+    /// AVAudioSequencer can remain marked as playing past its last event.
+    /// Reconcile the transport against the loaded file's end as well.
+    func refreshPlaybackState() {
+        guard playerIsPlaying else { return }
+        let duration = TimeInterval(sequencerTrackLengthSeconds)
+        let reachedEnd = sequencer.currentPositionInSeconds >= duration
+        guard reachedEnd || !sequencerIsPlaying else { return }
+
+        sequencer.stop()
+        playerIsPlaying = false
+        audioEngine.stopTimer()
+        AppleMIDIInstrument.silence(audioEngine.instrumentModule.sampler)
+        audioEngine.engine.pause()
+        if reachedEnd {
+            sequencer.currentPositionInSeconds = duration
+        }
     }
 
     var sequencerIsPlaying: Bool {

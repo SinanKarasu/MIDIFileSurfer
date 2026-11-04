@@ -112,7 +112,8 @@ class AudioEngine: NSObject {
         if let sequencerPositionSliderUpdateTimer = self.sequencerPositionSliderUpdateTimer {
             sequencerPositionSliderUpdateTimer.schedule(deadline: .now(), repeating: 0.1 * Double(NSEC_PER_SEC), leeway: .nanoseconds(0))
             sequencerPositionSliderUpdateTimer.setEventHandler {
-                self.sequencerPositionSlider = Float(self.sequencerModule.sequencerCurrentPosition )
+                self.sequencerModule.refreshPlaybackState()
+                self.sequencerPositionSlider = self.sequencerModule.sequencerCurrentPosition
             }
             sequencerPositionSliderUpdateTimer.resume()
         }

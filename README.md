@@ -17,7 +17,7 @@ It also doubles as a MIDI file inspector. For every loaded file you get:
 - File header info: format type, PPQ or SMPTE timebase, track count
 - Instrument overview across all tracks and channels
 
-Playback controls let you adjust speed (0–2×) and pitch (±2400 cents) in real time without stopping.
+Playback controls let you adjust speed (0.25–2×) and pitch (±2400 cents) in real time without stopping.
 
 ## Modes
 
@@ -62,8 +62,9 @@ rather than starting playback. Preview metadata is parsed off the main thread.
 
 ## Requirements
 
-- macOS 14 Sonoma or later
-- Xcode 15 or later (to build from source)
+The App Store release requires macOS Tahoe 26.0 or later on Apple silicon. Intel Macs are not supported.
+
+The source is available on GitHub. Builds for Intel or earlier versions of macOS are outside the supported release configuration.
 
 ## Getting Started
 
