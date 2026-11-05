@@ -21,9 +21,9 @@ These checks are not App Store approval. Source changes through build 2 are comm
 - Public privacy policy: https://github.com/SinanKarasu/MIDIFileSurfer/blob/feature/quicklook-midi-playback/PRIVACY.md
 - App Store Connect: Music category, subtitle, calculated 4+ age rating, reviewer notes, no sign-in requirement, and manual release saved.
 - Privacy disclosure is saved as Data Not Collected but NOT published; the account holder must confirm Apple's accuracy declaration.
-- Pricing and availability remain to be saved. Intended price: free ($0.00).
-- Build 2 still needs selecting after processing, reviewer contact information completing, and final submission. No public App Store review submission has been made.
-- Bundled DemoLoop.mid redistribution permission is awaiting confirmation from Sinan. TestFlight-installed candidate smoke testing is still outstanding.
+- Worldwide availability configured for all 175 regions, available on manual release. Pricing verified as free ($0.00), including United States and displayed regional prices.
+- Build 2 selected and saved for version 1.0; reviewer contact details saved. App Store validation reports only two remaining blockers: Content Rights Information and publishing the privacy disclosure. Both left for account-holder confirmation. No App Store review submission has been made.
+- Demo MIDI by Sinan Karasu. Sinan confirmed DemoLoop.mid is his own GarageBand creation (November 5, 2026); redistribution approved. TestFlight-installed candidate smoke testing is still outstanding.
 
 
 ## Before making the release build
