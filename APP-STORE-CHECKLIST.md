@@ -10,7 +10,21 @@ Release scope: free macOS app, with public source on GitHub. iPadOS and visionOS
 - [x] Project enables App Sandbox and read-only user-selected file access for the app and extension.
 - [x] App source has an MIT license; Git remote points to https://github.com/SinanKarasu/MIDIFileSurfer.
 
-These checks are not distribution signing or approval. Local fixes are not yet committed or pushed.
+These checks are not App Store approval. Source changes through build 2 are committed and pushed on feature/quicklook-midi-playback.
+
+## November 5 release preparation
+
+- Build 1.0 (2) was archived with signing and uploaded successfully through Xcode Organizer.
+- App and Quick Look extension are arm64 only, minimum macOS 26.0, version 1.0, build 2.
+- Release build and all seven automated tests passed.
+- Build 2 bundles third-party MIT notices, a local privacy policy, and the UserDefaults privacy manifest (CA92.1). Help menu links expose notices, privacy, support, and source.
+- Public privacy policy: https://github.com/SinanKarasu/MIDIFileSurfer/blob/feature/quicklook-midi-playback/PRIVACY.md
+- App Store Connect: Music category, subtitle, calculated 4+ age rating, reviewer notes, no sign-in requirement, and manual release saved.
+- Privacy disclosure is saved as Data Not Collected but NOT published; the account holder must confirm Apple's accuracy declaration.
+- Pricing and availability remain to be saved. Intended price: free ($0.00).
+- Build 2 still needs selecting after processing, reviewer contact information completing, and final submission. No public App Store review submission has been made.
+- Bundled DemoLoop.mid redistribution permission is awaiting confirmation from Sinan. TestFlight-installed candidate smoke testing is still outstanding.
+
 
 ## Before making the release build
 
